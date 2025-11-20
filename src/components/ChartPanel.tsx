@@ -49,8 +49,13 @@ const Crosshair = ({ xPx, yPx }: { xPx: number; yPx: number }) => {
   );
 };
 
-const CustomReferenceDot = (props: any) => {
-  const { cx, cy, fill = "gold" } = props;
+const CustomReferenceDot = (props: {
+  cx: number;
+  cy: number;
+  fill?: "gold" | undefined;
+  icon: string;
+}) => {
+  const { cx, cy, fill = "gold", icon } = props;
 
   return (
     <g>
@@ -65,15 +70,28 @@ const CustomReferenceDot = (props: any) => {
         />
         <animate
           attributeName="opacity"
-          from="0.5"
+          from="0.4"
           to="0"
           dur="1.6s"
           repeatCount="indefinite"
         />
       </circle>
 
-      {/* Core circle */}
-      <circle cx={cx} cy={cy} r="8" fill={fill} />
+      {/* Inner solid circle */}
+      <circle cx={cx} cy={cy} r="10" fill={fill}>
+        <Icon icon={icon} className="text-2xl text-red-500" />
+      </circle>
+
+      {/* Icon at center */}
+      <foreignObject
+        x={cx - 8}
+        y={cy - 8}
+        width={16}
+        height={16}
+        style={{ pointerEvents: "none" }}
+      >
+        <Icon icon={icon} className="text-2xl text-red-500" />
+      </foreignObject>
     </g>
   );
 };
