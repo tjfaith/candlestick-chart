@@ -156,13 +156,64 @@ export const OHLCV = [
   },
 ];
 
+// export const SERIES = [
+//   { key: "gemini", color: "#3f6cff", label: "gemini-3-pro" },
+//   { key: "qwen", color: "#dfe9ff", label: "qwen3-max" },
+//   { key: "gpt", color: "#5fb3d9", label: "gpt-5.1" },
+//   { key: "grok", color: "#b6f0df", label: "grok-4" },
+//   { key: "deepseek", color: "#4962ff", label: "deepseek-chat-v3.1" },
+//   { key: "kimi", color: "#2b9cff", label: "kimi-k2-thinking" },
+//   { key: "mystery", color: "#8b8b8b", label: "mystery-model" },
+//   { key: "claude", color: "#ff9f8b", label: "claude-sonnet-4-5" },
+// ];
+
 export const SERIES = [
-  { key: "gemini", color: "#3f6cff", label: "gemini-3-pro" },
-  { key: "qwen", color: "#dfe9ff", label: "qwen3-max" },
-  { key: "gpt", color: "#5fb3d9", label: "gpt-5.1" },
-  { key: "grok", color: "#b6f0df", label: "grok-4" },
-  { key: "deepseek", color: "#4962ff", label: "deepseek-chat-v3.1" },
-  { key: "kimi", color: "#2b9cff", label: "kimi-k2-thinking" },
-  { key: "mystery", color: "#8b8b8b", label: "mystery-model" },
-  { key: "claude", color: "#ff9f8b", label: "claude-sonnet-4-5" },
+  {
+    key: "gemini",
+    color: "#3f6cff",
+    label: "gemini-3-pro",
+    icon: "logos:google-gemini",
+  },
+  {
+    key: "qwen",
+    color: "#dfe9ff",
+    label: "qwen3-max",
+    icon: "logos:alibaba-cloud",
+  },
+  {
+    key: "gpt",
+    color: "#5fb3d9",
+    label: "gpt-5.1",
+    icon: "logos:openai-icon",
+  },
+  {
+    key: "grok",
+    color: "#b6f0df",
+    label: "grok-4",
+    icon: "simple-icons:x",
+  },
+  {
+    key: "deepseek",
+    color: "#4962ff",
+    label: "deepseek-chat-v3.1",
+    icon: "simple-icons:deepseek",
+  },
+  {
+    key: "kimi",
+    color: "#2b9cff",
+    label: "kimi-k2-thinking",
+    icon: "material-symbols:robot-happy-outline",
+  },
+  {
+    key: "mystery",
+    color: "#8b8b8b",
+    label: "mystery-model",
+    icon: "mdi:ghost",
+  },
+  {
+    key: "claude",
+    color: "#ff9f8b",
+    label: "claude-sonnet-4-5",
+    icon: "logos:anthropic",
+  },
 ];

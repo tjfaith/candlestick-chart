@@ -40,6 +40,7 @@ export interface SeriesItem {
   key: string;
   label: string;
   color: string;
+  icon: string;
 }
 
 export interface ChartProps {
