@@ -15,6 +15,7 @@ import {
   Customized,
 } from "recharts";
 import { CustomTooltip, RenderCandles } from "@/components";
+import { Icon } from "@iconify/react";
 
 function formatMoney(v: number | string | undefined) {
   if (v == null) return "-";
@@ -44,6 +45,35 @@ const Crosshair = ({ xPx, yPx }: { xPx: number; yPx: number }) => {
         strokeDasharray="4 4"
         strokeWidth={1}
       />
+    </g>
+  );
+};
+
+const CustomReferenceDot = (props: any) => {
+  const { cx, cy, fill = "gold" } = props;
+
+  return (
+    <g>
+      {/* Glow ring */}
+      <circle cx={cx} cy={cy} r="10" fill={fill} opacity="0.4">
+        <animate
+          attributeName="r"
+          from="10"
+          to="22"
+          dur="1.6s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          from="0.5"
+          to="0"
+          dur="1.6s"
+          repeatCount="indefinite"
+        />
+      </circle>
+
+      {/* Core circle */}
+      <circle cx={cx} cy={cy} r="8" fill={fill} />
     </g>
   );
 };
@@ -139,7 +169,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
     <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
       <div
         ref={chartWrapperRef}
-        className="flex-1 relative bg-white rounded-xl md:p-4 px-0 shadow-sm"
+        className="flex-1 relative bg-white rounded-xl md:px-4 px-0 py-4 shadow-sm"
         style={{ minHeight: 320 }}
       >
         <h3 className="text-center text-sm tracking-wider font-bold select-none">
@@ -214,10 +244,11 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                     fill={p.color}
                     stroke="#fff"
                     strokeWidth={2}
+                    shape={CustomReferenceDot}
                     label={{
                       value: `$${formatMoney(p.value)}`,
                       position: "right",
-                      fill: "#111",
+                      fill: p.color,
                       fontSize: 12,
                     }}
                   />
@@ -273,7 +304,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
           className="absolute inset-0 z-30"
           style={{ touchAction: "none", background: "transparent" }}
         />
-        <div className="mt-3 flex flex-wrap items-center gap-3 px-1">
+        <div className="mt-3 flex flex-wrap items-center gap-3 px-4 md:px-1">
           {SERIES.map((s) => (
             <div key={s.key} className="flex items-center gap-2 text-xs">
               <div
