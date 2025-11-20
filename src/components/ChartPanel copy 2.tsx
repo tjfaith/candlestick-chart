@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { ChartProps, HoverData } from "@/types/chart.type";
 
 import {
@@ -24,28 +24,30 @@ function formatMoney(v: number | string | undefined) {
     : v;
 }
 
-const Crosshair = ({ x, y }: { x: number; y: number }) => (
-  <g pointerEvents="none">
-    <line
-      x1={x}
-      x2={x}
-      y1={0}
-      y2="100%"
-      stroke="#94a3b8"
-      strokeWidth={1}
-      strokeDasharray="4 4"
-    />
-    <line
-      x1={0}
-      x2="100%"
-      y1={y}
-      y2={y}
-      stroke="#94a3b8"
-      strokeWidth={1}
-      strokeDasharray="4 4"
-    />
-  </g>
-);
+const Crosshair = ({ xPx, yPx }: { xPx: number; yPx: number }) => {
+  return (
+    <g>
+      <line
+        x1={xPx}
+        x2={xPx}
+        y1={0}
+        y2="100%"
+        stroke="#94a3b8"
+        strokeDasharray="4 4"
+        strokeWidth={1}
+      />
+      <line
+        x1={0}
+        x2="100%"
+        y1={yPx}
+        y2={yPx}
+        stroke="#94a3b8"
+        strokeDasharray="4 4"
+        strokeWidth={1}
+      />
+    </g>
+  );
+};
 
 const CustomReferenceDot = (props: {
   cx: number;
@@ -96,10 +98,6 @@ const CustomReferenceDot = (props: {
 
 const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
   const [activeLine, setActiveLine] = useState<string | null>(null);
-  const [crosshairPos, setCrosshairPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const [mode, setMode] = useState<"line" | "ohlcv">("line");
   const [hover, setHover] = useState<HoverData | null>(null);
   const chartWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -124,10 +122,9 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
     if (!wrap) return;
 
     const rect = wrap.getBoundingClientRect();
+
     const xRel = Math.min(Math.max(0, clientX - rect.left), rect.width);
     const yRel = Math.min(Math.max(0, clientY - rect.top), rect.height);
-
-    setCrosshairPos({ x: xRel, y: yRel });
 
     const xRatio = rect.width <= 0 ? 0 : xRel / rect.width;
     const source = mode === "line" ? DATA : OHLCV;
@@ -187,20 +184,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
   const onLeaveOverlay = () => setHover(hover);
 
-  useEffect(() => {
-    window.addEventListener("mousemove", onMouseMoveOverlay);
-    window.addEventListener("mouseleave", onLeaveOverlay);
-    window.addEventListener("touchmove", onTouchMoveOverlay);
-    window.addEventListener("touchend", onLeaveOverlay);
-
-    return () => {
-      window.removeEventListener("mousemove", onMouseMoveOverlay);
-      window.removeEventListener("mouseleave", onLeaveOverlay);
-      window.removeEventListener("touchmove", onTouchMoveOverlay);
-      window.removeEventListener("touchend", onLeaveOverlay);
-    };
-  }, []);
-
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
       <div
@@ -235,38 +218,15 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                   tickLine={false}
                 />
 
-                {crosshairPos && (
-                  <div className="pointer-events-none absolute inset-0 z-50">
-                    {/* Vertical line */}
-                    <div
-                      className="absolute top-0 w-px h-full bg-slate-400"
-                      style={{
-                        left: crosshairPos.x + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-
-                    {/* Horizontal line */}
-                    <div
-                      className="absolute left-0 h-px w-full bg-slate-400"
-                      style={{
-                        top: crosshairPos.y + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-                  </div>
+                {hover && (
+                  <Customized
+                    component={<Crosshair xPx={hover.xPx!} yPx={hover.yPx!} />}
+                  />
                 )}
-
-                {/* <Tooltip
-                  cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
-                  content={(props) => <CustomTooltip {...props} />}
-                /> */}
 
                 <Tooltip
                   cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
-                  content={(props) => (
-                    <CustomTooltip {...props} activeLine={activeLine} />
-                  )}
+                  content={(props) => <CustomTooltip {...props} />}
                 />
 
                 {SERIES.map((s, idx) => (
@@ -284,7 +244,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                     />
 
                     {/* MAIN INTERACTIVE LINE */}
-                    {/* <Line
+                    <Line
                       type="linear"
                       dataKey={s.key}
                       stroke={s.color}
@@ -306,18 +266,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                       onMouseEnter={() => setActiveLine(s.key)}
                       onMouseLeave={() => setActiveLine(null)}
                       onClick={() => setActiveLine(s.key)}
-                    /> */}
-
-                    <Line
-                      type="linear"
-                      dataKey={s.key}
-                      stroke={s.color}
-                      strokeWidth={activeLine === s.key ? 4 : 2}
-                      opacity={activeLine === s.key ? 1 : 0.4}
-                      dot={false}
-                      activeDot={{ r: 6 }}
-                      onMouseEnter={() => setActiveLine(s.key)}
-                      onMouseLeave={() => setActiveLine(null)}
                     />
                   </React.Fragment>
                 ))}
@@ -363,26 +311,10 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                   tickLine={false}
                 />
 
-                {crosshairPos && (
-                  <div className="pointer-events-none absolute inset-0 z-50">
-                    {/* Vertical line */}
-                    <div
-                      className="absolute top-0 w-px h-full bg-slate-400"
-                      style={{
-                        left: crosshairPos.x + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-
-                    {/* Horizontal line */}
-                    <div
-                      className="absolute left-0 h-px w-full bg-slate-400"
-                      style={{
-                        top: crosshairPos.y + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-                  </div>
+                {hover && (
+                  <Customized
+                    component={<Crosshair xPx={hover.xPx!} yPx={hover.yPx!} />}
+                  />
                 )}
 
                 <Tooltip
@@ -399,8 +331,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
           </ResponsiveContainer>
         </div>
 
-        {/* 1. POINTER CAPTURE LAYER — sits UNDER overlay, OVER the chart */}
-        {/* <div
+        <div
           onMouseMove={onMouseMoveOverlay}
           onMouseLeave={onLeaveOverlay}
           onTouchMove={onTouchMoveOverlay}
@@ -409,41 +340,9 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
           style={{
             touchAction: "none",
             background: "transparent",
-            pointerEvents: "auto", // IMPORTANT
-          }}
-        /> */}
-
-        <div
-          className="absolute inset-0 z-30"
-          style={{
-            pointerEvents: "none",
-            background: "transparent",
-            touchAction: "none",
+            // pointerEvents: "none",
           }}
         />
-
-        {/* 2. CROSSHAIR OVERLAY — sits ABOVE everything, but doesn't block */}
-        {crosshairPos && (
-          <div className="absolute inset-0 z-50 pointer-events-none">
-            {/* Vertical line */}
-            <div
-              className="absolute top-0 w-px h-full bg-slate-400"
-              style={{
-                left: crosshairPos.x + "px",
-                opacity: 0.8,
-              }}
-            />
-
-            {/* Horizontal line */}
-            <div
-              className="absolute left-0 h-px w-full bg-slate-400"
-              style={{
-                top: crosshairPos.y + "px",
-                opacity: 0.8,
-              }}
-            />
-          </div>
-        )}
 
         <div className="mt-3 flex flex-wrap items-center gap-3 px-4 md:px-1">
           {SERIES.map((s) => (

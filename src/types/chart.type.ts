@@ -58,6 +58,7 @@ export interface CustomTooltipProps {
     dataKey?: string;
     color?: string;
   }[];
+  activeLine?: string | null;
 }
 
 // export type CustomTooltipProps = TooltipProps<ValueType, NameType>;
