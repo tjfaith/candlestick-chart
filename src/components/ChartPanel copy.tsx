@@ -97,7 +97,6 @@ const CustomReferenceDot = (props: {
 };
 
 const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
-  const [activeLine, setActiveLine] = useState<string | null>(null);
   const [mode, setMode] = useState<"line" | "ohlcv">("line");
   const [hover, setHover] = useState<HoverData | null>(null);
   const chartWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -231,47 +230,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
                 {SERIES.map((s, idx) => (
                   <React.Fragment key={s.key}>
-                    {/* Background faint line */}
-                    <Line
-                      type="linear"
-                      dataKey={s.key}
-                      stroke={s.color}
-                      strokeWidth={8}
-                      dot={false}
-                      opacity={0.06}
-                      isAnimationActive={false}
-                      pointerEvents="none"
-                    />
-
-                    {/* MAIN INTERACTIVE LINE */}
-                    <Line
-                      type="linear"
-                      dataKey={s.key}
-                      stroke={s.color}
-                      strokeWidth={
-                        activeLine === s.key
-                          ? 4
-                          : idx === 0 || s.key === "deepseek"
-                          ? 3
-                          : 2
-                      }
-                      opacity={activeLine === s.key ? 1 : 0.4}
-                      dot={false}
-                      isAnimationActive={true}
-                      activeDot={{
-                        r: activeLine === s.key ? 6 : 0,
-                        style: { transition: "0.2s" },
-                        tabIndex: 0, // enables focus
-                      }}
-                      onMouseEnter={() => setActiveLine(s.key)}
-                      onMouseLeave={() => setActiveLine(null)}
-                      onClick={() => setActiveLine(s.key)}
-                    />
-                  </React.Fragment>
-                ))}
-
-                {/* {SERIES.map((s, idx) => (
-                  <React.Fragment key={s.key}>
                     <Line
                       type="linear"
                       dataKey={s.key}
@@ -293,7 +251,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                       isAnimationActive={true}
                     />
                   </React.Fragment>
-                ))} */}
+                ))}
 
                 {lastPoints.map((p) => (
                   <ReferenceDot
@@ -362,13 +320,8 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
           onTouchMove={onTouchMoveOverlay}
           onTouchEnd={onLeaveOverlay}
           className="absolute inset-0 z-30"
-          style={{
-            // touchAction: "none",
-            background: "transparent",
-            pointerEvents: "none",
-          }}
+          style={{ touchAction: "none", background: "transparent" }}
         />
-
         <div className="mt-3 flex flex-wrap items-center gap-3 px-4 md:px-1">
           {SERIES.map((s) => (
             <div key={s.key} className="flex items-center gap-2 text-xs">
@@ -387,8 +340,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
           ))}
         </div>
       </div>
-
-      {/* SIDEBAR */}
 
       <div className="w-full lg:w-72 bg-white rounded-xl p-4 shadow-sm mt-2 lg:mt-0">
         <div className="flex justify-between items-center">
