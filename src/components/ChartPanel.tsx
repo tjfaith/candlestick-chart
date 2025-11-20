@@ -24,28 +24,28 @@ function formatMoney(v: number | string | undefined) {
     : v;
 }
 
-const Crosshair = ({ x, y }: { x: number; y: number }) => (
-  <g pointerEvents="none">
-    <line
-      x1={x}
-      x2={x}
-      y1={0}
-      y2="100%"
-      stroke="#94a3b8"
-      strokeWidth={1}
-      strokeDasharray="4 4"
-    />
-    <line
-      x1={0}
-      x2="100%"
-      y1={y}
-      y2={y}
-      stroke="#94a3b8"
-      strokeWidth={1}
-      strokeDasharray="4 4"
-    />
-  </g>
-);
+// const Crosshair = ({ x, y }: { x: number; y: number }) => (
+//   <g pointerEvents="none">
+//     <line
+//       x1={x}
+//       x2={x}
+//       y1={0}
+//       y2="100%"
+//       stroke="#94a3b8"
+//       strokeWidth={1}
+//       strokeDasharray="4 4"
+//     />
+//     <line
+//       x1={0}
+//       x2="100%"
+//       y1={y}
+//       y2={y}
+//       stroke="#94a3b8"
+//       strokeWidth={1}
+//       strokeDasharray="4 4"
+//     />
+//   </g>
+// );
 
 const CustomReferenceDot = (props: {
   cx: number;
@@ -175,11 +175,11 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
     }
   };
 
-  const onMouseMoveOverlay = (e: React.MouseEvent) => {
+  const onMouseMoveOverlay = (e: MouseEvent) => {
     handlePointer(e.clientX, e.clientY);
   };
 
-  const onTouchMoveOverlay = (e: React.TouchEvent) => {
+  const onTouchMoveOverlay = (e: TouchEvent) => {
     const touch = e.touches[0];
     if (!touch) return;
     handlePointer(touch.clientX, touch.clientY);
@@ -269,7 +269,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                   )}
                 />
 
-                {SERIES.map((s, idx) => (
+                {SERIES.map((s) => (
                   <React.Fragment key={s.key}>
                     {/* Background faint line */}
                     <Line
