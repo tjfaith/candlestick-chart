@@ -44,6 +44,7 @@ export interface CandleEntry {
 
 export interface SeriesItem {
   key: string;
+  key2: string;
   label: string;
   color: string;
   icon: string;

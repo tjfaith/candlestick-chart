@@ -24,29 +24,6 @@ function formatMoney(v: number | string | undefined) {
     : v;
 }
 
-// const Crosshair = ({ x, y }: { x: number; y: number }) => (
-//   <g pointerEvents="none">
-//     <line
-//       x1={x}
-//       x2={x}
-//       y1={0}
-//       y2="100%"
-//       stroke="#94a3b8"
-//       strokeWidth={1}
-//       strokeDasharray="4 4"
-//     />
-//     <line
-//       x1={0}
-//       x2="100%"
-//       y1={y}
-//       y2={y}
-//       stroke="#94a3b8"
-//       strokeWidth={1}
-//       strokeDasharray="4 4"
-//     />
-//   </g>
-// );
-
 const CustomReferenceDot = (props: {
   cx: number;
   cy: number;
@@ -113,6 +90,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
     const last = DATA[DATA.length - 1];
     return SERIES.map((s) => ({
       key: s.key,
+      key2: s.key2,
       value: last?.[s.key],
       color: s.color,
       label: s.label,
@@ -124,24 +102,43 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
     if (!wrap) return;
 
     const rect = wrap.getBoundingClientRect();
-    const xRel = Math.min(Math.max(0, clientX - rect.left), rect.width);
-    const yRel = Math.min(Math.max(0, clientY - rect.top), rect.height);
+
+    // chart margins (must match your <ComposedChart margin={...} />)
+    const LEFT = 24;
+    const RIGHT = 120;
+
+    // raw relative positions
+    const rawX = clientX - rect.left;
+    const rawY = clientY - rect.top;
+
+    // clamp inside wrapper
+    const xRel = Math.min(Math.max(0, rawX), rect.width);
+    const yRel = Math.min(Math.max(0, rawY), rect.height);
 
     setCrosshairPos({ x: xRel, y: yRel });
 
-    const xRatio = rect.width <= 0 ? 0 : xRel / rect.width;
+    // -------------------------------
+    // REAL FIX: account for margins
+    // -------------------------------
+    const plotWidth = rect.width - LEFT - RIGHT;
+
+    // X inside the plotted chart area
+    const xInsidePlot = Math.min(plotWidth, Math.max(0, rawX - LEFT));
+
+    const xRatio = plotWidth <= 0 ? 0 : xInsidePlot / plotWidth;
+    // -------------------------------
+
     const source = mode === "line" ? DATA : OHLCV;
     if (!source || source.length === 0) return;
 
     const index = Math.round(xRatio * (source.length - 1));
 
-    const idx = Math.max(
-      0,
-      Math.min((mode === "line" ? DATA.length : OHLCV.length) - 1, index)
-    );
+    const idx = Math.max(0, Math.min(source.length - 1, index));
 
+    // LINE MODE
     if (mode === "line") {
       const row = DATA[idx];
+
       const yRatio = rect.height <= 0 ? 0 : yRel / rect.height;
       const yValue = LINE_Y_MAX - yRatio * (LINE_Y_MAX - LINE_Y_MIN);
 
@@ -155,24 +152,28 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
         xPx: xRel,
         yPx: yRel,
       });
-    } else {
-      if (!OHLCV || OHLCV.length === 0) return;
-      const row = OHLCV[idx];
-      const yRatio = rect.height <= 0 ? 0 : yRel / rect.height;
-      const yValue = OHLCV_Y_MAX - yRatio * (OHLCV_Y_MAX - OHLCV_Y_MIN);
 
-      setHover({
-        time: row.time,
-        yValue: Number(yValue.toFixed(2)),
-        open: row.open,
-        high: row.high,
-        low: row.low,
-        close: row.close,
-        volume: row.volume,
-        xPx: xRel,
-        yPx: yRel,
-      });
+      return;
     }
+
+    // OHLCV MODE
+    const row = OHLCV[idx];
+    const yRatio = rect.height <= 0 ? 0 : yRel / rect.height;
+    const yValue = OHLCV_Y_MAX - yRatio * (OHLCV_Y_MAX - OHLCV_Y_MIN);
+
+    setHover({
+      time: row.time,
+      yValue: Number(yValue.toFixed(2)),
+      open: row.open,
+      high: row.high,
+      low: row.low,
+      close: row.close,
+      volume: row.volume,
+      xPx: xRel,
+      yPx: yRel,
+    });
+
+    console.log(hover, "hover data...");
   };
 
   const onMouseMoveOverlay = (e: MouseEvent) => {
@@ -199,7 +200,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
       window.removeEventListener("touchmove", onTouchMoveOverlay);
       window.removeEventListener("touchend", onLeaveOverlay);
     };
-  }, []);
+  }, [mode]);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
@@ -235,33 +236,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                   tickLine={false}
                 />
 
-                {crosshairPos && (
-                  <div className="pointer-events-none absolute inset-0 z-50">
-                    {/* Vertical line */}
-                    <div
-                      className="absolute top-0 w-px h-full bg-slate-400"
-                      style={{
-                        left: crosshairPos.x + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-
-                    {/* Horizontal line */}
-                    <div
-                      className="absolute left-0 h-px w-full bg-slate-400"
-                      style={{
-                        top: crosshairPos.y + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* <Tooltip
-                  cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
-                  content={(props) => <CustomTooltip {...props} />}
-                /> */}
-
                 <Tooltip
                   cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
                   content={(props) => (
@@ -270,47 +244,31 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                 />
 
                 {SERIES.map((s) => (
-                  <React.Fragment key={s.key}>
-                    {/* Background faint line */}
+                  <React.Fragment key={s.key + "-group"}>
                     <Line
+                      key={`${s.key}-background`}
                       type="linear"
-                      dataKey={s.key}
+                      dataKey={s.key2}
+                      name={`${s.key}-bg`}
                       stroke={s.color}
                       strokeWidth={8}
                       dot={false}
-                      opacity={0.06}
+                      activeDot={false}
                       isAnimationActive={false}
+                      legendType="none"
+                      strokeOpacity={0.06}
+                      onMouseEnter={undefined}
+                      onMouseLeave={undefined}
+                      onMouseMove={undefined}
+                      onClick={undefined}
                       pointerEvents="none"
                     />
 
-                    {/* MAIN INTERACTIVE LINE */}
-                    {/* <Line
-                      type="linear"
-                      dataKey={s.key}
-                      stroke={s.color}
-                      strokeWidth={
-                        activeLine === s.key
-                          ? 4
-                          : idx === 0 || s.key === "deepseek"
-                          ? 3
-                          : 2
-                      }
-                      opacity={activeLine === s.key ? 1 : 0.4}
-                      dot={false}
-                      isAnimationActive={true}
-                      activeDot={{
-                        r: activeLine === s.key ? 6 : 0,
-                        style: { transition: "0.2s" },
-                        tabIndex: 0, // enables focus
-                      }}
-                      onMouseEnter={() => setActiveLine(s.key)}
-                      onMouseLeave={() => setActiveLine(null)}
-                      onClick={() => setActiveLine(s.key)}
-                    /> */}
-
                     <Line
+                      key={`${s.key}-main`}
                       type="linear"
                       dataKey={s.key}
+                      name={`${s.key}-main`}
                       stroke={s.color}
                       strokeWidth={activeLine === s.key ? 4 : 2}
                       opacity={activeLine === s.key ? 1 : 0.4}
@@ -324,7 +282,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
                 {lastPoints.map((p) => (
                   <ReferenceDot
-                    key={p.key}
+                    key={p.key + "-dot"}
                     x={DATA[DATA.length - 1].time}
                     y={p.value}
                     r={8}
@@ -363,32 +321,9 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                   tickLine={false}
                 />
 
-                {crosshairPos && (
-                  <div className="pointer-events-none absolute inset-0 z-50">
-                    {/* Vertical line */}
-                    <div
-                      className="absolute top-0 w-px h-full bg-slate-400"
-                      style={{
-                        left: crosshairPos.x + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-
-                    {/* Horizontal line */}
-                    <div
-                      className="absolute left-0 h-px w-full bg-slate-400"
-                      style={{
-                        top: crosshairPos.y + "px",
-                        opacity: 0.8,
-                      }}
-                    />
-                  </div>
-                )}
-
                 <Tooltip
                   cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
                   content={(props) => <CustomTooltip {...props} />}
-                  // content={<CustomTooltip />}
                 />
 
                 <Bar dataKey="volume" barSize={14} fill="#222" opacity={0.06} />
@@ -398,20 +333,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
             )}
           </ResponsiveContainer>
         </div>
-
-        {/* 1. POINTER CAPTURE LAYER — sits UNDER overlay, OVER the chart */}
-        {/* <div
-          onMouseMove={onMouseMoveOverlay}
-          onMouseLeave={onLeaveOverlay}
-          onTouchMove={onTouchMoveOverlay}
-          onTouchEnd={onLeaveOverlay}
-          className="absolute inset-0 z-30"
-          style={{
-            touchAction: "none",
-            background: "transparent",
-            pointerEvents: "auto", // IMPORTANT
-          }}
-        /> */}
 
         <div
           className="absolute inset-0 z-30"
@@ -447,7 +368,10 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
         <div className="mt-3 flex flex-wrap items-center gap-3 px-4 md:px-1">
           {SERIES.map((s) => (
-            <div key={s.key} className="flex items-center gap-2 text-xs">
+            <div
+              key={s.key + "-legend"}
+              className="flex items-center gap-2 text-xs"
+            >
               <div
                 className="w-3 h-3 rounded-sm"
                 style={{ background: s.color }}
@@ -491,8 +415,8 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                 <>
                   <div className="text-xs text-gray-400 mt-2">Model values</div>
                   <div className="grid grid-cols-2 gap-1 text-xs">
-                    {Object.entries(hover.values || {}).map(([k, v]) => (
-                      <div key={k} className="flex justify-between">
+                    {Object.entries(hover.values || {}).map(([k, v], index) => (
+                      <div key={index} className="flex justify-between">
                         <div className="capitalize">{k}</div>
                         <div>${formatMoney(v as number)}</div>
                       </div>
