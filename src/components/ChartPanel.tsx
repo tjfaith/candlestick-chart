@@ -103,7 +103,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
     const rect = wrap.getBoundingClientRect();
 
-    // chart margins (must match your <ComposedChart margin={...} />)
     const LEFT = 24;
     const RIGHT = 120;
 
@@ -117,9 +116,6 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
     setCrosshairPos({ x: xRel, y: yRel });
 
-    // -------------------------------
-    // REAL FIX: account for margins
-    // -------------------------------
     const plotWidth = rect.width - LEFT - RIGHT;
 
     // X inside the plotted chart area
