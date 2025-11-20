@@ -14,17 +14,13 @@ import {
   Bar,
   Customized,
 } from "recharts";
-import { RenderCandles } from "@/components";
+import { CustomTooltip, RenderCandles } from "@/components";
 
 function formatMoney(v: number | string | undefined) {
   if (v == null) return "-";
   return typeof v === "number"
     ? v.toLocaleString(undefined, { maximumFractionDigits: 2 })
     : v;
-}
-
-function EmptyTooltip() {
-  return null;
 }
 
 const Crosshair = ({ xPx, yPx }: { xPx: number; yPx: number }) => {
@@ -181,7 +177,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
                 <Tooltip
                   cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
-                  content={<EmptyTooltip />}
+                  content={(props) => <CustomTooltip {...props} />}
                 />
 
                 {SERIES.map((s, idx) => (
@@ -194,7 +190,7 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
                       dot={false}
                       opacity={0.06}
                       isAnimationActive={false}
-                      style={{ pointerEvents: "none" }}
+                      // style={{ pointerEvents: "none" }}
                     />
 
                     <Line
@@ -257,7 +253,8 @@ const ChartPanel = ({ DATA, OHLCV, SERIES }: ChartProps) => {
 
                 <Tooltip
                   cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
-                  content={<EmptyTooltip />}
+                  content={(props) => <CustomTooltip {...props} />}
+                  // content={<CustomTooltip />}
                 />
 
                 <Bar dataKey="volume" barSize={14} fill="#222" opacity={0.06} />

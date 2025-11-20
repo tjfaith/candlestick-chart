@@ -1,3 +1,9 @@
+// import type { TooltipProps } from "recharts";
+// import type {
+//   ValueType,
+//   NameType,
+// } from "recharts/types/component/DefaultTooltipContent";
+
 export interface LinePoint {
   time: string;
   [key: string]: number | string;
@@ -42,6 +48,19 @@ export interface SeriesItem {
   color: string;
   icon: string;
 }
+
+export interface CustomTooltipProps {
+  active?: boolean;
+  label?: string | number;
+  payload?: readonly {
+    value: number;
+    name?: string;
+    dataKey?: string;
+    color?: string;
+  }[];
+}
+
+// export type CustomTooltipProps = TooltipProps<ValueType, NameType>;
 
 export interface ChartProps {
   DATA: LinePoint[];
